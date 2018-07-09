@@ -1,0 +1,20 @@
+
+# This file overrides the system.rootrc file in the root installation
+# I've removed most of example stuff as I think the fonts settings 
+# changed and that appears to have broken 5.34 on linux
+
+# The main thing is that we need to  tell ROOT where to find our macros
+Unix.*.Root.DynamicPath:    .:$(ROOTSYS)/lib:$(SCTDAQ_ROOT)/bin:~/software/eudaq/build/producers/root
+Unix.*.Root.MacroPath:      .:$(ROOTSYS)/macros:$(SCTDAQ_ROOT)/macros:$(SCTDAQ_ROOT)/analysis:$(SCTDAQ_ROOT)/macros/systest:$(SCTDAQ_ROOT)/macros/beta
+WinNT.*.Root.DynamicPath:   .\;$(ROOTSYS);$(ROOTSYS)\bin;$(SCTDAQ_ROOT)\bin;c:\sctdaq\bin;$(PATH)
+WinNT.*.Root.MacroPath:     .\;$(ROOTSYS)\macros;$(ROOTSYS)\tutorials;$(SCTDAQ_ROOT)\macros;$(SCTDAQ_ROOT)\analysis;$(SCTDAQ_ROOT)\macros\systest;$(SCTDAQ_ROOT)\macros\beta;c:\sctdaq\stdll;c:\sctdaq\macros;c:\sctdaq\analysis;c:\sctdaq\tests;d:\sctvar\macros;c:\tbdaq\macros;c:\sctdaq\macros\systest;c:\sctdaq\macros\beta
+
+# We use the logon script in particular to setup the environment (loading dlls)
+Rint.Logon:              rootlogon.C
+Rint.Logoff:             rootlogoff.C
+Rint.History:            root_history.txt
+
+# These can be useful, but normally easier to debug without
+#Root.Debug:              0
+#Root.ErrorHandlers:      0
+#Root.Stacktrace:         no
