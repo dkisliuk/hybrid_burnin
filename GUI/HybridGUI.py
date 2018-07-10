@@ -18,8 +18,8 @@ ROOTSYS     = os.environ['ROOTSYS']
 HYBRID_BURN = os.environ['PWD']
 
 #FIFO
-sendfifoName=HYBRID_BURN + "/GUI2DAQ.fifo"
-recvfifoName=HYBRID_BURN + "/DAQ2GUI.fifo"
+sendfifoName = HYBRID_BURN + "/GUI2DAQ.fifo"
+recvfifoName = HYBRID_BURN + "/DAQ2GUI.fifo"
 
 #Window class defines the display, dimensions, buttons, etc.
 class Window(QtGui.QMainWindow):
@@ -136,28 +136,30 @@ class Window(QtGui.QMainWindow):
 	def exit_app(self):
 		print("HybridGUI.py - Exiting")
 		#TODO Quit ITSDAQ
+		sendCommand(sendfifoName, "Quit")
 		sys.exit()
 	#end exit_app
 
+	#Sends commands to RunTests.cpp server to run ITSDAQ tests
 	def run_tests(self):
 		print "HybridGUI.py - Opening fifo %s for sending" %sendfifoName
-		sendfifo = open(sendfifoName, 'w')
-		#recvfifo = open(recvfifoName, 'r')
-		#if sendfifo < 0:
-		#	print "HybridGUI.py - Could not open fifo %s" %sendfifoName
-		#	return
-
-		print "HybridGUI.py - Sending 'Start' signal to ITSDAQ"
-		sendfifo.write("Start\0") #Tell ITSDAQ to launch
-		#if recvfifo.read() is not 'ACK':
-		#	return
-		#sendfifo.write("HCC\0") #Tell ITSDAQ to launch
+		sendCommand(sendfifoName, "Start")
+		recvMsg = recvCommand(recvfifoName)
+		sendCommand(sendfifoName, "HCC")
+		recvMsg = recvCommand(recvfifoName)
+		sendCommand(sendfifoName, "ChipID")
+		recvMsg = recvCommand(recvfifoName)
 		if self.strobeDelay.isChecked():
 			print "    Strobe Delay test"
+			sendCommand(sendfifoName, "Strobe")
+			recvMsg = recvCommand(recvfifoName)
 		if self.trimRange.isChecked():
 			print "    Trim Range test"
+			sendCommand(sendfifoName, "Trim")
+			recvMsg = recvCommand(recvfifoName)
 		if self.threePtGain.isChecked():
 			print "    Three Point Gain test"
+			recvMsg = recvCommand(recvfifoName)
 		if self.responseCurve.isChecked():
 			print "    Response Curve test"
 		if self.noiseOccup.isChecked():
@@ -173,6 +175,23 @@ def launch():
 	app = QtGui.QApplication(sys.argv)
 	GUI = Window()
 	sys.exit(app.exec_())
+#end launch
+
+def sendCommand(fifoName, buf):
+	sendfifo = open(fifoName, 'w')
+	print "Sending '%s' signal to %s" %(buf, fifoName)
+	sendfifo.write(buf + '\0')
+	sendfifo.close()
+#end sendCommand
+
+def recvCommand(fifoName):
+	print "Opening %s" %fifoName
+	recvfifo = open(fifoName, 'r')
+	buf = recvfifo.read()
+	recvfifo.close()
+	return buf
+#end recvCommand
+	
 
 if __name__ == '__main__':
 	launch()
