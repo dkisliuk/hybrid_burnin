@@ -28,6 +28,7 @@ class Window(QtGui.QMainWindow):
 		self.initY = 20
 		self.sizeX = 500
 		self.sizeY = 500
+		self.ITSDAQup = False
 		print '\nHybridGUI.py - Instantiating instance of Window class\n'
 		super(Window, self).__init__()
 		self.setGeometry(self.initX, self.initY, 
@@ -55,26 +56,27 @@ class Window(QtGui.QMainWindow):
 		self.strobeDelay = QtGui.QCheckBox('Strobe Delay', self)
 		self.strobeDelay.resize(150, 20)
 		self.strobeDelay.move(checkboxPosX, checkboxPosY)
-		self.strobeDelay.toggle()
+		if Config.strobeDelay: self.strobeDelay.toggle()
 
 		self.trimRange = QtGui.QCheckBox('Trim Range', self)
 		self.trimRange.resize(150, 20)
 		self.trimRange.move(checkboxPosX, checkboxPosY+20)
-		self.trimRange.toggle()
+		if Config.trimRange: self.trimRange.toggle()
 
 		self.threePtGain = QtGui.QCheckBox('Three Point Gain', self)
 		self.threePtGain.resize(150, 20)
 		self.threePtGain.move(checkboxPosX, checkboxPosY+40)
+		if Config.threePtGain: self.threePtGain.toggle()
 
 		self.responseCurve = QtGui.QCheckBox('Response Curve', self)
 		self.responseCurve.resize(150, 20)
 		self.responseCurve.move(checkboxPosX, checkboxPosY+60)
-		self.responseCurve.toggle()
+		if Config.responseCurve: self.responseCurve.toggle()
 
 		self.noiseOccup = QtGui.QCheckBox('Noise Occupancy', self)
 		self.noiseOccup.resize(150, 20)
 		self.noiseOccup.move(checkboxPosX, checkboxPosY+80)
-		self.noiseOccup.toggle()
+		if Config.noiseOccup: self.noiseOccup.toggle()
 		
 		#Run button
 		runX = 100
@@ -143,12 +145,14 @@ class Window(QtGui.QMainWindow):
 	#Sends commands to RunTests.cpp server to run ITSDAQ tests
 	def run_tests(self):
 		print "HybridGUI.py - Opening fifo %s for sending" %sendfifoName
-		sendCommand(sendfifoName, "Start")
-		recvMsg = recvCommand(recvfifoName)
-		sendCommand(sendfifoName, "HCC")
-		recvMsg = recvCommand(recvfifoName)
-		sendCommand(sendfifoName, "ChipID")
-		recvMsg = recvCommand(recvfifoName)
+		if self.ITSDAQup == False:
+			self.ITSDAQup = True
+			sendCommand(sendfifoName, "Start")
+			recvMsg = recvCommand(recvfifoName)
+			sendCommand(sendfifoName, "HCC")
+			recvMsg = recvCommand(recvfifoName)
+			sendCommand(sendfifoName, "ChipID")
+			recvMsg = recvCommand(recvfifoName)
 		if self.strobeDelay.isChecked():
 			print "    Strobe Delay test"
 			sendCommand(sendfifoName, "Strobe")

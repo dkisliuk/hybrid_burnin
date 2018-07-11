@@ -5,8 +5,7 @@ import sys
 import os
 import ROOT
 import subprocess
-HOME = os.environ['HOME']
-os.environ["HYBRID_BURN"] = os.environ["PWD"]
+os.environ["HYBRID_BURN"] = os.environ["PWD"] #Needs to be launched in correct directory
 HYBRID_BURN = os.environ["HYBRID_BURN"]
 
 #ID number for the network card used for connecting to FPGA
@@ -22,7 +21,7 @@ except:
 	print '    ROOTSYS'
 	print 'Please set appropriately.'
 	sys.exit()
-sys.path.insert(0, HOME+'/hybrid_burnin/GUI')
+sys.path.insert(0, HYBRID_BURN+'/GUI')
 import HybridGUI
 from PyQt4 import QtGui
 
@@ -38,13 +37,10 @@ def main():
 	else:
 		os.mkfifo(toHsio  )
 		os.mkfifo(fromHsio)
-
-	'''
-	os.system("sudo echo")
-	runHsio = "sudo " +SCTDAQ_ROOT+"/bin/hsioPipe --eth "+NETWORK_CARD_ID+",e0:dd:cc:bb:aa:00 --file "+toHsio+","+fromHsio
+	runHsio = subprocess.Popen(['sudo '+SCTDAQ_ROOT+'/bin/hsioPipe --eth '+NETWORK_CARD_ID+',e0:dd:cc:bb:aa:00 --file '+toHsio+','+fromHsio], shell=True)
+	#runHsio = subprocess.Popen(['sudo', SCTDAQ_ROOT+'/bin/hsioPipe', '--eth '+NETWORK_CARD_ID+',e0:dd:cc:bb:aa:00 --file '+toHsio+','+fromHsio])
 	print 'Master.py - Opening hsioPipe'
-	os.system(runHsio+ " &")
-	'''
+	
 
 	#Fork
 	pid = os.fork()
