@@ -29,7 +29,10 @@ int RunTests()
 	gROOT->ProcessLine(".L Stavelet.cpp");
 	gROOT->ProcessLine(".L CaptureWhateverABC130.cpp");
 	gROOT->ProcessLine(".L ABC130StrobeDelay.cpp");
+	gROOT->ProcessLine(".L ABC130TrimRange.cpp");
 	gROOT->ProcessLine(".L ABC130ThreePointGain.cpp");
+	gROOT->ProcessLine(".L ABC130ResponseCurve.cpp");
+	gROOT->ProcessLine(".L ABC130No.cpp");
 
 	//Open 'read' fifo from GUI
 	char recvMsg[MAX_BUF];
@@ -45,12 +48,16 @@ int RunTests()
 		if(check) return 1;
 
 		//All the commands
-		if(strcmp(recvMsg,"Start")   == 0) gROOT->ProcessLine("Stavelet()");
-		if(strcmp(recvMsg,"HCC")     == 0) gROOT->ProcessLine("CaptureABC130_HCC_Pattern()");
-		if(strcmp(recvMsg,"ChipID")  == 0) gROOT->ProcessLine("CaptureABC130Chips()");
-		if(strcmp(recvMsg,"Strobe")  == 0) gROOT->ProcessLine("ABC130StrobeDelay()");
-		if(strcmp(recvMsg,"Trim")    == 0) gROOT->ProcessLine("ABC130TrimRange()");
-		if(strcmp(recvMsg,"ThreePt") == 0) gROOT->ProcessLine("ABC130ThreePointGain(qCentre=2.0)");
+		if(strcmp(recvMsg,"Start")     == 0) gROOT->ProcessLine("Stavelet()");
+		if(strcmp(recvMsg,"HCC")       == 0) gROOT->ProcessLine("CaptureABC130_HCC_Pattern()");
+		if(strcmp(recvMsg,"ChipID")    == 0) gROOT->ProcessLine("CaptureABC130Chips()");
+		if(strcmp(recvMsg,"Strobe")    == 0) gROOT->ProcessLine("ABC130StrobeDelay()");
+		if(strcmp(recvMsg,"Trim")      == 0) gROOT->ProcessLine("ABC130TrimRange()");
+		if(strcmp(recvMsg,"ThreePt")   == 0) gROOT->ProcessLine("ABC130ThreePointGain(qCentre=2.0)");
+		if(strcmp(recvMsg,"RespCurve") == 0) gROOT->ProcessLine("ABC130ResponseCurve()");
+		if(strcmp(recvMsg,"NoiseOcc")  == 0) TestRegistry::runTest("NoiseOccupancy");
+
+		//TODO check for fail conditions and send "FAIL" back to GUI
 		
 		if(strcmp(recvMsg,"Quit")   == 0) break;
 		sendCommand(sendfifo, "ACK\0");

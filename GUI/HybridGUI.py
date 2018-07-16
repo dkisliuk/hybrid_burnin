@@ -12,7 +12,9 @@ E-mail: dkisliuk@physics.utoronto.ca
 import sys
 import os
 from PyQt4 import QtGui, QtCore
+from FIFOsharing import sendCommand, recvCommand, SendRecv #Local file
 import HybridConfig as Config
+import time
 SCTDAQ_ROOT = os.environ['SCTDAQ_ROOT']
 ROOTSYS     = os.environ['ROOTSYS']
 HYBRID_BURN = os.environ['PWD']
@@ -133,11 +135,16 @@ class Window(QtGui.QMainWindow):
 		self.CH3Volt.setValue(Config.CH3Volt)
 		self.CH3Curr.setValue(Config.CH3Curr)
 		self.show()
+		time.sleep(1)
+
+		#Run tests immediately if 'runOnStart' in config file is true
+		if(Config.runOnStart):
+			#TODO add functionality to turn on LV
+			self.run_tests()
 	#end home
 
 	def exit_app(self):
 		print("HybridGUI.py - Exiting")
-		#TODO Quit ITSDAQ
 		sendCommand(sendfifoName, "Quit")
 		sys.exit()
 	#end exit_app
@@ -145,29 +152,32 @@ class Window(QtGui.QMainWindow):
 	#Sends commands to RunTests.cpp server to run ITSDAQ tests
 	def run_tests(self):
 		print "HybridGUI.py - Opening fifo %s for sending" %sendfifoName
+		#Only run the following commands if ITSDAQ has not yet been launched
 		if self.ITSDAQup == False:
 			self.ITSDAQup = True
-			sendCommand(sendfifoName, "Start")
-			recvMsg = recvCommand(recvfifoName)
-			sendCommand(sendfifoName, "HCC")
-			recvMsg = recvCommand(recvfifoName)
-			sendCommand(sendfifoName, "ChipID")
-			recvMsg = recvCommand(recvfifoName)
+			recvMsg = SendRecv(sendfifoName, recvfifoName, "Start")
+			recvMsg = SendRecv(sendfifoName, recvfifoName, "HCC")
+			recvMsg = SendRecv(sendfifoName, recvfifoName, "ChipID")
+		#Strobe Delay
 		if self.strobeDelay.isChecked():
-			print "    Strobe Delay test"
-			sendCommand(sendfifoName, "Strobe")
-			recvMsg = recvCommand(recvfifoName)
+			print "Running:    Strobe Delay test"
+			recvMsg = SendRecv(sendfifoName, recvfifoName, "Strobe")
+		#Trim Range
 		if self.trimRange.isChecked():
-			print "    Trim Range test"
-			sendCommand(sendfifoName, "Trim")
-			recvMsg = recvCommand(recvfifoName)
+			print "Running:    Trim Range test"
+			recvMsg = SendRecv(sendfifoName, recvfifoName, "Trim")
+		#Three Point Gain (qCentre = 2fC)
 		if self.threePtGain.isChecked():
-			print "    Three Point Gain test"
-			recvMsg = recvCommand(recvfifoName)
+			print "Running:    Three Point Gain test"
+			recvMsg = SendRecv(sendfifoName, recvfifoName, "ThreePt")
+		#Response Curve (400 events)
 		if self.responseCurve.isChecked():
-			print "    Response Curve test"
+			print "Running:    Response Curve test"
+			recvMsg = SendRecv(sendfifoName, recvfifoName, "RespCurve")
+		#Noise Occupancy
 		if self.noiseOccup.isChecked():
-			print "    Noise Occupancy test"
+			print "Running:    Noise Occupancy test"
+			recvMsg = SendRecv(sendfifoName, recvfifoName, "NoiseOcc")
 	#end run_tests
 
 	def LVdisplay(self):
@@ -180,22 +190,6 @@ def launch():
 	GUI = Window()
 	sys.exit(app.exec_())
 #end launch
-
-def sendCommand(fifoName, buf):
-	sendfifo = open(fifoName, 'w')
-	print "Sending '%s' signal to %s" %(buf, fifoName)
-	sendfifo.write(buf + '\0')
-	sendfifo.close()
-#end sendCommand
-
-def recvCommand(fifoName):
-	print "Opening %s" %fifoName
-	recvfifo = open(fifoName, 'r')
-	buf = recvfifo.read()
-	recvfifo.close()
-	return buf
-#end recvCommand
-	
 
 if __name__ == '__main__':
 	launch()

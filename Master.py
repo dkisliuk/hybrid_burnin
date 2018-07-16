@@ -39,7 +39,6 @@ def main():
 		os.mkfifo(fromHsio)
 	subprocess.call(['sudo echo'], shell=True)
 	runHsio = subprocess.Popen(['sudo gnome-terminal -x '+SCTDAQ_ROOT+'/bin/hsioPipe --eth '+NETWORK_CARD_ID+',e0:dd:cc:bb:aa:00 --file '+toHsio+','+fromHsio], shell=True)
-	#runHsio = subprocess.Popen(['sudo', SCTDAQ_ROOT+'/bin/hsioPipe', '--eth '+NETWORK_CARD_ID+',e0:dd:cc:bb:aa:00 --file '+toHsio+','+fromHsio])
 	print 'Master.py - Opening hsioPipe'
 	
 
