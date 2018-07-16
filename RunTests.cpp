@@ -29,7 +29,6 @@ int RunTests()
 	gROOT->ProcessLine(".L Stavelet.cpp");
 	gROOT->ProcessLine(".L CaptureWhateverABC130.cpp");
 	gROOT->ProcessLine(".L ABC130StrobeDelay.cpp");
-	gROOT->ProcessLine(".L ABC130StrobeDelay.cpp");
 	gROOT->ProcessLine(".L ABC130ThreePointGain.cpp");
 
 	//Open 'read' fifo from GUI

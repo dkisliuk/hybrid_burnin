@@ -37,13 +37,24 @@ def main():
 	else:
 		os.mkfifo(toHsio  )
 		os.mkfifo(fromHsio)
-	runHsio = subprocess.Popen(['sudo '+SCTDAQ_ROOT+'/bin/hsioPipe --eth '+NETWORK_CARD_ID+',e0:dd:cc:bb:aa:00 --file '+toHsio+','+fromHsio], shell=True)
+	subprocess.call(['sudo echo'], shell=True)
+	runHsio = subprocess.Popen(['sudo gnome-terminal -x '+SCTDAQ_ROOT+'/bin/hsioPipe --eth '+NETWORK_CARD_ID+',e0:dd:cc:bb:aa:00 --file '+toHsio+','+fromHsio], shell=True)
 	#runHsio = subprocess.Popen(['sudo', SCTDAQ_ROOT+'/bin/hsioPipe', '--eth '+NETWORK_CARD_ID+',e0:dd:cc:bb:aa:00 --file '+toHsio+','+fromHsio])
 	print 'Master.py - Opening hsioPipe'
 	
 
 	#Fork
 	pid = os.fork()
+
+	if pid > 0: #Parent process
+		#Launch ITSDAQ
+		ParentPid = os.getpid()
+		GUIpid = pid
+		print 'Master.py - Launching ITSDAQ server locally'
+		subprocess.Popen([ROOTSYS+'/bin/root', '-l', 'RunTests.cpp'],
+						 stdin=subprocess.PIPE)
+						 
+
 	if pid == 0: #Child process
 		#Launch GUI
 		GUIpid = os.getpid()
@@ -51,19 +62,5 @@ def main():
 		app = QtGui.QApplication(sys.argv)
 		display = HybridGUI.Window()
 		sys.exit(app.exec_())
-
-
-
-	else: #Parent process
-		#Launch ITSDAQ
-		ITSDAQpid = os.getpid()
-		print 'Master.py - Launching ITSDAQ server locally'
-
-		#os.system('sudo ' +SCTDAQ_ROOT+'/bin/hsioPipe --eth '+NETWORK_CARD_ID+',e0:dd:cc:bb:aa:00 --file /home/ITSDAQ/hsioPipe.toHsio,/home/ITSDAQ/hsioPipe.fromHsio &')
-
-		os.system(ROOTSYS+'/bin/root -l RunTests.cpp')
-		#os.chdir(SCTDAQ_ROOT)
-		#ROOT.gInterpreter.ProcessLine(ROOTSYS+'/bin/root -l Stavelet.cpp')
-		#os.system(ROOTSYS+'/bin/root -l Stavelet.cpp')
 
 main()
