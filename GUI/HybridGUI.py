@@ -14,7 +14,6 @@ import os
 from PyQt4 import QtGui, QtCore
 from FIFOsharing import sendCommand, recvCommand, SendRecv #Local file
 import HybridConfig as Config
-import time
 SCTDAQ_ROOT = os.environ['SCTDAQ_ROOT']
 ROOTSYS     = os.environ['ROOTSYS']
 HYBRID_BURN = os.environ['PWD']
@@ -94,14 +93,19 @@ class Window(QtGui.QMainWindow):
 		LVlabel = QtGui.QLabel("LV Supply", self)
 		LVlabel.move(LV_X+4, LV_Y-25)
 		VoltLabel = QtGui.QLabel("Volt (V)", self)
-		CurrLabel = QtGui.QLabel("Curr (A)", self)
 		VoltLabel.move(LV_X+50, LV_Y+25)
+		CurrLabel = QtGui.QLabel("Curr (A)", self)
 		CurrLabel.move(LV_X+110, LV_Y+25)
+		LVbutton = QtGui.QPushButton("Set LV", self)
+		LVbutton.move(LV_X+60, LV_Y+140)
+		LVbutton.clicked.connect(self.run_LV)
 		self.LVmenu = QtGui.QComboBox(self)
 		self.LVmenu.move(LV_X, LV_Y)
 		self.LVmenu.addItem("Keithley2230G")
 		self.LVmenu.addItem("Instek")
 		self.LVmenu.addItem("Sorensen")
+		if Config.deviceName is not None:
+			self.LVmenu.setCurrentIndex(self.LVmenu.findText(Config.deviceName) ) #Choose device from config file
 		self.LVmenu.activated.connect(self.LVdisplay)
 		self.CH1 = QtGui.QLabel("CH1", self)
 		self.CH2 = QtGui.QLabel("CH2", self)
@@ -135,7 +139,6 @@ class Window(QtGui.QMainWindow):
 		self.CH3Volt.setValue(Config.CH3Volt)
 		self.CH3Curr.setValue(Config.CH3Curr)
 		self.show()
-		time.sleep(1)
 
 		#Run tests immediately if 'runOnStart' in config file is true
 		if(Config.runOnStart):
@@ -146,6 +149,8 @@ class Window(QtGui.QMainWindow):
 	def exit_app(self):
 		print("HybridGUI.py - Exiting")
 		sendCommand(sendfifoName, "Quit")
+		sock = setClient()
+		sock.sendall("Quit")
 		sys.exit()
 	#end exit_app
 
@@ -180,6 +185,42 @@ class Window(QtGui.QMainWindow):
 			recvMsg = SendRecv(sendfifoName, recvfifoName, "NoiseOcc")
 	#end run_tests
 
+	def run_LV(self):
+		if Config.raspIP is not None:
+			#Setup client
+			import socket
+			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			server_address = (Config.raspIP, Config.port)
+			print "HybridGUI.py - Connecting to %s port %s" %server_address
+			sock.connect(server_address)
+
+			dev = str(self.LVmenu.currentText() )
+			V1 = str(self.CH1Volt.value() )
+			V2 = str(self.CH2Volt.value() )
+			V3 = str(self.CH3Volt.value() )
+			C1 = str(self.CH1Curr.value() )
+			C2 = str(self.CH2Curr.value() )
+			C3 = str(self.CH3Curr.value() )
+
+			try:
+				message = "dev=%s V1=%s V2=%s V3=%s C1=%s C2=%s C3=%s" %(dev, V1, V2, V3, C1, C2, C3)
+				print "HybridGUI.py - Sending message to server: %s" %message
+				sock.sendall(message)
+				recvSize = 0
+				recvExpct = 4
+				data = ''
+				while recvSize < recvExpct:
+					data = sock.recv(1024)
+					recvSize += len(data)
+				if data == "ACK\0":
+					print "HybridGUI.py - LV successfully set"
+				else:
+					print "HybridGUI.py - Problem setting up LV"
+			finally:
+				print "HybridGUI.py - Closing socket"
+				sock.close()		
+	#end run_LV
+
 	def LVdisplay(self):
 		text = str(self.LVmenu.currentText() )
 		print 'Selected: ' + text
@@ -190,6 +231,16 @@ def launch():
 	GUI = Window()
 	sys.exit(app.exec_())
 #end launch
+
+def setClient():
+	#Setup client
+	import socket
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	server_address = (Config.raspIP, Config.port)
+	print "HybridGUI.py - Connecting to %s port %s" %server_address
+	sock.connect(server_address)
+	return sock
+#end setClient
 
 if __name__ == '__main__':
 	launch()
