@@ -10,10 +10,10 @@ CH3Curr = 2.00
 #Initial device. Options are "Keithley2230G", "Instek", or "Sorensen"
 deviceName = "Keithley2230G"
 
-#Tests to be 'checked' on startup
+#Run test this many times
 strobeDelay = 1
-trimRange = 0
-threePtGain = 0
+trimRange = 1
+threePtGain = 5
 responseCurve = 0
 noiseOccup = 0
 
@@ -24,5 +24,7 @@ runOnStart = False
 #Raspberry pi info
 #Can set raspIP to None if you don't have one
 raspIP = "128.100.75.214"
+raspPassword = "merlin"
 raspHostName = "pi"
+raspPort = 22
 port = 6464

@@ -33,6 +33,7 @@ int RunTests()
 	gROOT->ProcessLine(".L ABC130ThreePointGain.cpp");
 	gROOT->ProcessLine(".L ABC130ResponseCurve.cpp");
 	gROOT->ProcessLine(".L ABC130No.cpp");
+	gROOT->ProcessLine(".L STGUIStavelet.cpp");
 
 	//Open 'read' fifo from GUI
 	char recvMsg[MAX_BUF];
@@ -53,7 +54,7 @@ int RunTests()
 		if(strcmp(recvMsg,"ChipID")    == 0) gROOT->ProcessLine("CaptureABC130Chips()");
 		if(strcmp(recvMsg,"Strobe")    == 0) gROOT->ProcessLine("ABC130StrobeDelay()");
 		if(strcmp(recvMsg,"Trim")      == 0) gROOT->ProcessLine("ABC130TrimRange()");
-		if(strcmp(recvMsg,"ThreePt")   == 0) gROOT->ProcessLine("ABC130ThreePointGain(qCentre=2.0)");
+		if(strcmp(recvMsg,"ThreePt")   == 0) gROOT->ProcessLine("ABC130ThreePointGain(qCentre=1.0)");
 		if(strcmp(recvMsg,"RespCurve") == 0) gROOT->ProcessLine("ABC130ResponseCurve()");
 		if(strcmp(recvMsg,"NoiseOcc")  == 0) TestRegistry::runTest("NoiseOccupancy");
 
