@@ -32,6 +32,8 @@ def CheckTests(fileName, testName="STROBE_DELAY"):
 	testSummary = ResultsSummaryFile(fileName)
 	testSummary.getTests()
 	results = testSummary.returnTests()
+	if results == 1:
+		return 1
 
 	if DEBUG: print results
 
@@ -110,4 +112,5 @@ def CheckTests(fileName, testName="STROBE_DELAY"):
 				break #Only read latest test
 		#end if		
 	#end for
+	return 0
 #end def CheckTests

@@ -18,6 +18,8 @@ import HybridConfig as Config
 SCTDAQ_ROOT = os.environ['SCTDAQ_ROOT']
 ROOTSYS     = os.environ['ROOTSYS']
 HYBRID_BURN = os.environ['PWD']
+sys.path.insert(0, HYBRID_BURN+'/testManager')
+from CheckTests import CheckTests
 
 #FIFO
 sendfifoName = HYBRID_BURN + "/GUI2DAQ.fifo"
@@ -218,6 +220,10 @@ class Window(QtGui.QMainWindow):
             if DEBUG: print 'Received \'%s\'' %recvMsg
             recvMsg = SendRecv(sendfifoName, recvfifoName, "ChipID")
             if DEBUG: print 'Received \'%s\'' %recvMsg
+
+        #TODO
+        #Determine results file from date then CheckTests(fileName, testName)
+
         #Strobe Delay
         for i in range(self.strobeDelay.value() ):
             print "Running:    Strobe Delay test"
@@ -226,7 +232,7 @@ class Window(QtGui.QMainWindow):
         for i in range(self.trimRange.value() ):
             print "Running:    Trim Range test"
             recvMsg = SendRecv(sendfifoName, recvfifoName, "Trim")
-        #Three Point Gain (qCentre = 2fC)
+        #Three Point Gain (qCentre = 1fC)
         for i in range(self.threePtGain.value() ):
             print "Running:    Three Point Gain test"
             recvMsg = SendRecv(sendfifoName, recvfifoName, "ThreePt")
