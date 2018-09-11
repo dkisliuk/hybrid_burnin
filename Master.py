@@ -15,9 +15,11 @@ NETWORK_CARD_ID = "enp3s0"
 try:
 	SCTDAQ_ROOT = os.environ['SCTDAQ_ROOT']
 	ROOTSYS     = os.environ['ROOTSYS']
+	SCTDAQ_VAR  = os.environ['SCTDAQ_VAR']
 except:
 	print 'One of the following environment variables is not set:'
 	print '    SCTDAQ_ROOT'
+	print '    SCTDAQ_VAR'
 	print '    ROOTSYS'
 	print 'Please set appropriately.'
 	sys.exit()
@@ -61,5 +63,7 @@ def main():
 		app = QtGui.QApplication(sys.argv)
 		display = HybridGUI.Window()
 		sys.exit(app.exec_())
+#end main()
 
-main()
+if __name__=='__main__':
+	main()

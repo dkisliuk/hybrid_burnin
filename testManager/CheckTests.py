@@ -110,6 +110,8 @@ def CheckTests(fileName, testName="STROBE_DELAY"):
 						stream1.Print()
 						print
 				break #Only read latest test
+			elif testName == "NOISE_OCCUPANCY":
+				pass #TODO
 		#end if		
 	#end for
 	return 0
