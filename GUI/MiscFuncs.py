@@ -53,6 +53,7 @@ def recordTest(testName='STROBE_DELAY'):
             return 1
         if status:
             print bcolors.FAIL + 'Could not save results of %s test from file %s to database' %(testName, resultsFile) + bcolors.ENDC
+            return 1
     return 0
 #end recordTest
 
@@ -74,3 +75,36 @@ def changeLineValue(line, val):
         pieces[-1] = str(val)
     line = ' '.join(pieces)
     return line + '\n'
+    
+#TODO fix this
+#Launch the LV server on remote device
+def LVlaunchServer():
+    #If socket can be set up, server must be running
+    try:
+        sock = setClient()
+        return 0
+    #Server is not running so start it
+    except:
+        command = "sudo python %s/LV_server.py" %Config.LV_PATH
+        import paramiko
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy() )
+        ssh.connect(port=Config.raspPort, hostname=Config.raspIP,
+                    username=Config.raspHostName, password=Config.raspPassword)
+                    
+        stdin, stdout, stderr = ssh.exec_command(command,timeout=1.0)
+        ssh.close()
+        LVlaunchServer()
+        
+    #Double check that it's running now
+    sock.settimeout(1.0)
+    sock.send("Ping\0")
+    recv = sock.recv(1024)
+    flag = 1
+    if recv == "Ping\0":
+        print bcolors.OKGREEN + "LV server is running" + bcolors.ENDC
+        flag = 0
+    else:
+        print bcolors.FAIL + "LV server is not running" + bcolors.ENDC
+    sock.close()
+    return flag

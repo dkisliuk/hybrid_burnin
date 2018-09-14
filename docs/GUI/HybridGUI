@@ -1,0 +1,19 @@
+#########################
+HybridGUI
+#########################
+
+This is where most of the 'meat' of the burn-in package lies.
+
+Contains class declaration for the GUI called 'Window'. This class contains the information for how the GUI appears, and all of the GUI's functionalities (dropdown menus, buttons, etc.).
+
+The more interesting functions:
+
+run_tests:
+  Opens ITSDAQ and quickly configures the hybrids by checking HCC and Chip ID's. It is recommended that you check that the HCC and chip ID's are correct before using the 'Run Tests' button (there are buttons dedicated to doing this).
+  Begins runnings the tests designated in the 'Tests' section of the GUI in order. For example, if 'Strobe Delay' is set to 2, 'Trim Range' is set to 1, and 'Three Point Gain' is set to 5, Strobe Delay will be run 2 times, then Trim Range one time, then Three Point Gain 5 times.
+  run_tests interacts with the RunTests server and waits for each test to finish before moving onto the next one. If a test runs successfully, the parameters from the test will be exported to the database designated by the testManager/InfluxConfig file.
+  
+run_LV:
+  Connects to the remote device running LV_server and sends a string containing the LV settings requested by the user. The remote device must be running the LV_server or this will not work.
+  The string sent to the LV_server tells it which kind of device the LV supply is, and the voltage and current limits for each channel on the device.
+  NOTE: Currently only one supply is supported (the Keithley2230G). To add functionality for more devices, the remote LV controlling device needs a class file for the device and LV_server must be given a function for dealing with the new device.

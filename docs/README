@@ -1,0 +1,48 @@
+################################################################################################################################################
+
+Hybrid Burn-in Package
+Author: Dylan Kisliuk
+e-mail: dkisliuk@physics.utoronto.ca
+
+################################################################################################################################################
+
+Overview:
+This package is intended to run the hybrid burn-in cycle for as many hybrids as ITSDAQ can read at once.
+To view the details about a particular file and how it interacts, see the file with the corresponding name in the /docs directory
+
+To use the hybrid_burnin package, change to the base directory of the package and use
+
+$ python Master.py
+
+from the command line (uses python 2.7). Running the burn-in requires super user priviliges so ensure that you do.
+
+################################################################################################################################################
+
+Dependencies:
+ - PyQt4 (http://pyqt.sourceforge.net/Docs/PyQt4/installation.html)
+ - paramiko
+ - socket
+ - ROOT (this package was developed using ROOT 5.34.36)
+ - ITSDAQ
+ - influxdb
+
+This package was developed on Ubuntu 16.02.
+
+The GUI for this package is built using PyQt4.
+The paramiko library is used to send ssh commands to a remote device to control the LV supply.
+The socket library is used for communicating with the remote device mentioned above.
+ROOT is required by ITSDAQ and the RunTests macro
+ITSDAQ is required to run tests on the hybrids/modules
+Results are exported to an influxdb database. To set up a database server, see:
+    https://docs.influxdata.com/influxdb/v1.6/introduction/installation/
+
+################################################################################################################################################
+
+Required environment variables:
+SCTDAQ_ROOT: Path to the ITSDAQ package
+SCTDAQ_VAR: Path to the configuration and results directory for ITSDAQ (often called 'sctvar')
+ROOTSYS: Path to ROOT installation
+
+Ensure these environment variables point to the correct locations
+
+################################################################################################################################################

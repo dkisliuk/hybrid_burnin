@@ -13,7 +13,7 @@
 #define O_WRONLY	0x0001
 #define O_RDWR		0x0002
 
-#define DEBUG 1
+#define DEBUG 0
 
 int recvCommand(string fifoName);
 int sendCommand(string fifoName, char* buf);
@@ -89,7 +89,7 @@ int sendCommand(string fifoName, char* buf)
 	int fd = open(fifoName.c_str(), O_WRONLY);
 	if(fd < 0)
 	{
-		std::cout << "Error. Could not open FIFO " << fifoName << std::endl;
+		std::cout << "RunTests - Error. Could not open FIFO " << fifoName << std::endl;
 		return 1;
 	}
 	write(fd, buf, strlen(buf)+1);

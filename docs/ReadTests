@@ -1,0 +1,7 @@
+###############################
+ReadTests
+###############################
+
+ReadTests is a ROOT macro for launching ITSDAQ and running tests. 
+It runs as a server (launched automatically by Master) and runs the tests requested by the HybridGUI.
+It can launch the ITSDAQ Stavelet GUI, read HCC and ChipID, run Strobe Delay, Trim Range, Three Point Gain, Response Curve, and Noise Occupancy tests. When a test is complete, it sends an 'ACK' message back to the client.

@@ -1,0 +1,20 @@
+###############################
+Master
+###############################
+
+~~~!!!!IMPORTANT!!!!~~~
+Ensure you change the variables 'NETWORK_CARD_ID' and 'toHsio'/'fromHsio'.
+NETWORK_CARD_ID should match your network card. You can determine the correct value for this by running 'ifconfig' on the command line. Should be something like 'eth0' or 'enp3s0'
+'toHsio'/'fromHsio' should match the names used in your $SCTDAQ_VAR/config/st_system_config.dat file (required for running ITSDAQ).
+~~~!!!!IMPORTANT!!!!~~~
+
+The Master.py file is the main macro which should be executed by the user.
+It launches all the necessary processes for the burn-in cycle to run. These include:
+
+ - hsioPipe: Part of the ITSDAQ package and is required to talk with the FPGA (ATLYS, NEXYS, GENESYS...)
+
+ - RunTests: This is a C++ server which runs in the background and communicates which tests to run to ITSDAQ. It interfaces with the HybridGUI file.
+
+ - HybridGUI: Contains the class reference for the graphical user interface and controls which tests to run.
+ 
+ If successful, a new terminal window should open (from hsioPipe) and a GUI should open as well.

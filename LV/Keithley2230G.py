@@ -16,18 +16,20 @@ Date: May 2018
 import visa
 import time
 import sys
+DEBUG = 0
 
 class Keithley2230G:
     def __init__(self, name='USB0::1510::8752::9103795::0::INSTR'):
         self.resources = visa.ResourceManager('@py')
-        print('Resources available:')
-        print(self.resources.list_resources() )
-	print
+        if DEBUG:
+            print('Resources available:')
+            print(self.resources.list_resources() )
+	    print
         #To check the 'name' of your device, run the above commands
         try:
             self.device = self.resources.open_resource(name)
         except ValueError:
-            print 'Could not find device. Instantiate class object with:'
+            print 'Could not find device %s. Instantiate class object with:' %name
             print '>>>device = Keithley2230G(name="USB0::0000::1111::2345678::0::INSTR")'
             self.device = None
             return
@@ -90,7 +92,7 @@ class Keithley2230G:
     def readCURR(self, chan=1):
         self.sendCommand(':INST:SEL CH%d' %chan, 'write')
         self.sendCommand(':MEAS:SCAL:CURR:DC?', 'write')
-        self.sendCommand(':FETC:VOLT:DC?', 'write')
+        self.sendCommand(':FETC:CURR:DC?', 'write')
         #Only way I could figure out how to read is by closing then opening again
         try:
             self.device.close()
@@ -107,12 +109,12 @@ class Keithley2230G:
              self.volt[1] = volt2
         if volt3 is not 'none':
              self.volt[2] = volt3
-        print 'Setting Voltages to %f  %f  %f'  %(self.volt[0], self.volt[1], self.volt[2])
+        if DEBUG: print 'Setting Voltages to %f  %f  %f'  %(self.volt[0], self.volt[1], self.volt[2])
         self.device.write(':APP:VOLT %f,%f,%f\n' %(self.volt[0], self.volt[1], self.volt[2]) )
 
     #Ramp voltage over a period of time
     def rampVOLT(self, chan=1, stepSize=1.0, wait=1.0, finalVolt=5.0):
-        print 'Ramping voltage of channel %d' %chan
+        if DEBUG: print 'Ramping voltage of channel %d' %chan
         if chan is not 1 and chan is not 2 and chan is not 3:
             print '"chan" must be 1, 2, or 3'
             return
@@ -137,21 +139,21 @@ class Keithley2230G:
              self.curr[1] = curr2
         if curr3 is not 'none':
              self.curr[2] = curr3
-        print 'Setting Currents to %f  %f  %f'  %(self.curr[0], self.curr[1], self.curr[2])
+        if DEBUG: print 'Setting Currents to %f  %f  %f'  %(self.curr[0], self.curr[1], self.curr[2])
         self.device.write(':APP:CURR %f,%f,%f\n' %(self.curr[0], self.curr[1], self.curr[2]) )
 
     def localMode(self):
-        print 'Setting to local mode'
+        if DEBUG: print 'Setting to local mode'
         self.sendCommand(':SYST:LOC', 'write')
 
     def remoteMode(self):
-        print 'Setting to remote mode'
+        if DEBUG: print 'Setting to remote mode'
         self.sendCommand(':SYST:REM', 'write')
 #end Keithley2230G class definition
 
 # 'device' is the instance of Keithley2230G object you want read
 def getVOLT(device, chan=1):
-    print 'Read Voltage of Channel %d' %chan
+    if DEBUG: print 'Read Voltage of Channel %d' %chan
     voltage = False
     while voltage == False:
         voltage = device.readVOLT(chan) #Returns false in case of exception
@@ -159,7 +161,7 @@ def getVOLT(device, chan=1):
 
 # 'device' is the instance of Keithley2230G object you want read
 def getCURR(device, chan=1):
-    print 'Read Current of Channel %d' %chan
+    if DEBUG: print 'Read Current of Channel %d' %chan
     current = False
     while current == False:
         current = device.readCURR(chan) #Returns false in case of exception

@@ -1,0 +1,12 @@
+#####################
+MiscFuncs
+#####################
+
+Contains some miscellaneous functions used for the burn-in.
+
+The functions 'getResultsFiles' and 'recordTest' are used to read through the select the results file where test parameters are exported and then have the 'CheckTests' function export these parameters to an influxdb database (see CheckTests in testsManager)
+
+The 'setClient' function sets up a socket to the remote device
+
+'LVlaunchServer' remotely launches the remote LV server from the current host.
+##NOTE## Not working

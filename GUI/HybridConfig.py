@@ -32,3 +32,4 @@ raspPassword = "merlin"
 raspHostName = "pi"
 raspPort = 22
 port = 6464
+LV_PATH="/home/pi/ITk/LV"

@@ -1,0 +1,7 @@
+#####################################
+ITSDAQTestClasses
+#####################################
+
+Contains classes and functions for parsing ITSDAQ results files. For hybrid burn-in package, only the ResultsSummaryFile class is used which converts parameters in the results file into a set of dictionaries. These dictionaries are then broken up by CheckTests to retrieve the relevant information.
+
+##NOTE## The 'relevant' information may change and the implementation of CheckTests may be simplified in the future

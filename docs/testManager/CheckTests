@@ -1,0 +1,7 @@
+##########################
+CheckTests
+##########################
+
+This macro is used to record results to a database
+
+CheckTests reads a results file and looks for a particular test from the bottom of the file to the top (in order to look for the most recent test). Once this test is found, it creates an object specific to the test type and exports the data to an influxdb database. Only reads the first instance it sees of said test type in the file before exiting.

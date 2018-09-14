@@ -1,0 +1,5 @@
+###################
+InfluxConfig
+###################
+
+Contains hostname of the database, its port, username and password for accessing

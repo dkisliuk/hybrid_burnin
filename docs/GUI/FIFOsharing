@@ -1,0 +1,5 @@
+###################
+FIFOsharing
+###################
+
+Contains commands for sharing information using FIFOs. There's a command for sending data, receiving data, and for doing both at the same time

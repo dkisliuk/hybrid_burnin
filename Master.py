@@ -1,6 +1,5 @@
 #!/usr/python
 
-#from CommonVars import * #Contains imports and environment variables
 import sys
 import os
 import ROOT

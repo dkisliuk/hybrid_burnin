@@ -1,0 +1,9 @@
+#################################
+HybridConfig
+#################################
+
+This file contains initial variable values for the burn-in cycle as well as information for configuring the monitoring device.
+
+Most of the variables determine the initial values displayed in the GUI. These are intended to make it easier to run the burn-in multiple times without having to reset all the variables every time you shut it down. The GUI allows you to save your configuration to this file by clicking the 'Save Config' button (or you can alter this file manually). You can, of course, alter these values in the GUI directly and run the burn-in with said values without altering the config file.
+
+The monitoring device info is set in this file as well. The IP address on the network should be set in 'raspIP', along with its password and hostname. 'raspPort' is the port number used to ssh into your device (default 22). 'port' is the port number used by the LV_server macro on the remote device. If you haven't changed this, it should be 6464. 'LV_path' is the path to the low voltage macros on the remote device (should be a full path).

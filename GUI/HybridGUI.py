@@ -3,7 +3,7 @@
 '''
 Hybrid Burn-in GUI
 
-This GUI is intended make running the Hybrid burn-in cycle as intuitive as possible.
+This GUI is intended to make running the Hybrid burn-in cycle as intuitive as possible.
 
 Author: Dylan Kisliuk
 E-mail: dkisliuk@physics.utoronto.ca
@@ -11,8 +11,8 @@ E-mail: dkisliuk@physics.utoronto.ca
 
 import sys
 import os
-import subprocess
 import shutil
+import multiprocessing
 from PyQt4 import QtGui, QtCore
 from FIFOsharing import sendCommand, recvCommand, SendRecv #Local file
 import HybridConfig as Config
@@ -29,10 +29,12 @@ sendfifoName = HYBRID_BURN + "/GUI2DAQ.fifo"
 recvfifoName = HYBRID_BURN + "/DAQ2GUI.fifo"
 
 DEBUG = 1
+LVLAUNCH = 0
 
 #Window class defines the display, dimensions, buttons, etc.
 class Window(QtGui.QMainWindow):
     def __init__(self):
+        QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_X11InitThreads)
         self.initX = 20
         self.initY = 20
         self.sizeX = 500
@@ -40,10 +42,11 @@ class Window(QtGui.QMainWindow):
         self.ITSDAQup = False
         self.LVup = False
         self.setFonts()
+        self.proc_list = []
         if os.path.exists(sendfifoName) and os.path.exists(recvfifoName): pass
         else:
-	        os.mkfifo(sendfifoName)
-	        os.mkfifo(recvfifoName)
+            os.mkfifo(sendfifoName)
+            os.mkfifo(recvfifoName)
         print '\nHybridGUI.py - Instantiating instance of Window class\n'
         super(Window, self).__init__()
         self.setGeometry(self.initX, self.initY, 
@@ -155,13 +158,14 @@ class Window(QtGui.QMainWindow):
         runY = 30
         runBtn = QtGui.QPushButton("Run Tests", self)
         runBtn.clicked.connect(self.run_tests)
+        #runBtn.clicked.connect(self.run_tests_background)
         runBtn.resize(runX, runY)
         runBtn.move(testsboxPosX, testsboxPosY+105)
-        killBtn = QtGui.QPushButton("Kill Tests", self)
-        #TODO add functionality
-        #killBtn.clicked.connect(self.kill_runs)
-        killBtn.resize(runX, runY)
-        killBtn.move(testsboxPosX, testsboxPosY+135)
+        stopBtn = QtGui.QPushButton("Stop Tests", self)
+        stopBtn.clicked.connect(self.stop_tests)
+        stopBtn.resize(runX, runY)
+        stopBtn.move(testsboxPosX, testsboxPosY+135)
+        stopBtn.setEnabled(False)
         
         #LV supply
         LV_X = 0
@@ -268,9 +272,9 @@ class Window(QtGui.QMainWindow):
     def exit_app(self):
         print("HybridGUI.py - Exiting")
         sendCommand(sendfifoName, "Quit")
-        if self.LVup:
-            sock = setClient()
-            sock.sendall("Quit")
+        #if self.LVup:
+        #    sock = setClient()
+        #    sock.sendall("Quit")
         os.remove(sendfifoName)
         os.remove(recvfifoName)
         sys.exit()
@@ -315,7 +319,13 @@ class Window(QtGui.QMainWindow):
     #end launchDAQ
             
 
-    #TODO run as background process. Add KILL TESTS functionality
+    #Runs 'run_tests' as a background process. Enables user to interact with GUI while tests are running
+    def run_tests_background(self):
+        self.runTestsProc = multiprocessing.Process(name='run_tests', target=self.run_tests)
+        self.runTestsProc.start()
+        if DEBUG: print 'HybridGUI.py - Running tests in background'
+    #end run_tests_background
+
     #Sends commands to RunTests.cpp server to run ITSDAQ tests
     def run_tests(self):
         print "HybridGUI.py - Opening fifo %s for sending" %sendfifoName
@@ -371,29 +381,31 @@ class Window(QtGui.QMainWindow):
         self.statusUpdate("STATUS: Ready", color='green')
     #end run_tests
 
+    #TODO test this
+    #stop tests being run
+    def stop_tests(self):
+        if self.runTestsProc is not None:
+        #   self.runTestsProc.stop()
+            print 'HybridGUI.py - stopping tests'
+            self.runTestsProc.terminate()
+            self.runTestsProc.join()
+        else: print 'HybridGUI.py - No tests running. Do nothing'
+    #end stop_tests
+
+    #Set LV according to settings in GUI
     def run_LV(self):
         if Config.raspIP is not None:
             #Launch server on raspberry pi
             #TODO
-            '''
-            if Config.raspPassword is not None:
-                import paramiko
-                command = "sudo python $LV_CONTROL/LV_server.py"
-                ssh = paramiko.SSHClient()
-                ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy() )
-                ssh.connect(port=Config.raspPort, hostname=Config.raspIP,
-                            username=Config.raspHostName, password=Config.raspPassword)
-                stdin, stdout, stderr = ssh.exec_command(command,timeout=10)
-                #CHECK OUTPUT FOR DEBUGGING
-                #stdout.
-            '''
-            
+            if Config.raspPassword is not None and not self.LVup and LVLAUNCH:
+                LVlaunchServer()
+                self.LVup = True
             #Setup client
-            import socket
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server_address = (Config.raspIP, Config.port)
-            print "HybridGUI.py - Connecting to %s port %s" %server_address
-            sock.connect(server_address)
+            #import socket
+            sock = setClient()
+            #server_address = (Config.raspIP, Config.port)
+            #print "HybridGUI.py - Connecting to %s port %s" %server_address
+            #sock.connect(server_address)
 
             dev = str(self.LVmenu.currentText() )
             V1 = str(self.CH1Volt.value() )
@@ -415,9 +427,9 @@ class Window(QtGui.QMainWindow):
                 if response == "ACK\0":
                     print bcolors.OKGREEN + "HybridGUI.py - LV successfully set" + bcolors.ENDC
                 else:
-                    print bcolors.FAIL + "HybridGUI.py - Problem setting up LV" + bcolors.ENDC
+                    print bcolors.FAIL + "HybridGUI.py - Problem setting up LV. Try power cycling your source" + bcolors.ENDC
             finally:
-                print "HybridGUI.py - Closing socket"
+                if DEBUG: print "HybridGUI.py - Closing socket"
                 sock.close()        
     #end run_LV
 
@@ -426,6 +438,8 @@ class Window(QtGui.QMainWindow):
         print 'Selected: ' + text
     #end LVdisplay
 
+    #Select the configuration file for the hybrids.
+    #Copies the selected file to $SCTDAQ_VAR/config/st_system_config.dat which is used by ITSDAQ to configure the hybrids and chips
     def selectConfig(self):
         configFile = QtGui.QFileDialog.getOpenFileName(self, 'Open File')
         shutil.copy(configFile, SCTDAQ_VAR + '/config/st_system_config.dat')
